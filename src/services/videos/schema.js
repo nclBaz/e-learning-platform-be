@@ -22,7 +22,7 @@ const VideoSchema = new Schema(
     playListLength: Number,
     playList: [{ 
         src: String, 
-        type:String,
+        type: {type:String},
         duration: Number, 
         contentName: String }],
     category: String,
@@ -36,17 +36,21 @@ const VideoSchema = new Schema(
 
     // saved: [{ type: Schema.Types.ObjectId, ref: "user" }],
   },
+
+  
   { timestamps: true }
 );
 
 
-UserSchema.static("addVideosToPlayList", async function (id, product) {
+VideoSchema.static("addVideosToPlayList", async function (id, source) {
     await VideoSchema.findOneAndUpdate(
       { _id: id },
       {
-        $push: { playList: product },
+        $push: { playList: source},
       }
     )
   })
 
-module.exports = model("video", VideoSchema);
+  const UserModel = model("video", VideoSchema)
+
+module.exports = UserModel;

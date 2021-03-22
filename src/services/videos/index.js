@@ -1,6 +1,7 @@
 const express = require("express");
 
 const VideoSchema = require("./schema");
+const playlistSchema = require("../playlist/schema");
 
 
 const { authenticate } = require("../auth/tools");
@@ -27,21 +28,47 @@ videoRouter.post("/", authorize, async (req, res, next) => {
 })
 
 videoRouter.post("/addplaylist/:videoId", authorize, async (req, res, next) => {
-	try {
-		console.log("NEW VIDEO")
-		const video = { ...req.body }
-		console.log(video)
 
-	
-		const newvideo = new VideoSchema(video)
-		const { _id } = await newvideo.save()
+
+    try {
+ 
+   
+        const playlist = new playlistSchema(req.body)
         
-		
-		res.status(201).send(_id)
-	} catch (error) {
-		next(error)
-	}
-})
+        const playlistToInsert = { ...playlist.toObject()}
+        console.log(playlist,playlistToInsert)
+    
+        const updated = await VideoSchema.findByIdAndUpdate(
+          req.params.videoId,
+          {
+            $push: {
+              playList: playlistToInsert,
+            },
+          },
+          { runValidators: true, new: true }
+        )
+        res.status(201).send(updated)
+      } catch (error) {
+        next(error)
+      }
+    })
+
+// 	try {
+//         const video = await VideoSchema.findById(req.params.videoId)
+//         const playlist= req.body
+//         console.log(video)
+//         if( video){
+//             await VideoSchema.addVideosToPlayList(req.params.videoId, playlist)
+//             res.send(playlist)
+
+//         }else{
+//             res.send("video doesn't exist in db!")
+//         }
+       
+// 	} catch (error) {
+// 		next(error)
+// 	}
+// })
 
 
 videoRouter.get("/", authorize, async (req, res, next) => {
