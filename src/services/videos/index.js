@@ -215,6 +215,7 @@ videoRouter.get("/:courseId/playlist", authorize,async (req, res, next) => {
     }
   })
   
+  
 
   ///
   

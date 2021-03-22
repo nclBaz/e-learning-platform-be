@@ -2,6 +2,7 @@ const express = require("express");
 
 const UserSchema = require("./Schema");
 const VideoSchema = require("../videos/schema");
+const myProgressSchema = require("../myProgress/schema");
 const passport = require("passport");
 const fetch = require("node-fetch");
 
@@ -138,57 +139,79 @@ userRouter.post("/logout", authorize, async (req, res, next) => {
 
 
 userRouter.post("/myLearning/:courseId",authorize, async (req, res, next) => {
+try{
+  const modifiedVideo = await  myProgressSchema.findOneAndUpdate({
+    "user._id": req.user._id,
+    "course._id": req.params.courseId,
+  }, { ...req.body,
+    course:req.params.courseId,
+    user:req.user._id
+    }, {
+    runValidators: true,
+    new: true,
+  })
+ 
+  if(modifiedVideo){
+    res.send(modifiedVideo)
 
-    
-  try {
+
+  }else{
     const id = req.params.courseId
     
-    const video = await VideoSchema.findById(id).populate(
-        "video"  
-    )
+    const course = await VideoSchema.findById(id)
     
-    if (video) {
+    if (course) {
 
-        const newVideo = { ...video.toObject(),
-          isCompleted:req.body.isCompleted,
-      	remainingTime:req.body.	remainingTime,
-      	secondLeft:	req.body.secondLeft,
-      	completePercentage:req.body.completePercentage,
-      	playlistIndex:req.body.playlistIndex}
-      
-        await UserSchema.findOneAndUpdate(
-            { _id: req.user._id },
-            {
-              $push: { myVideos: newVideo},
-            }
-          )
-          res.send(req.user.myVideos)
+     
 
-        // await UserSchema.addVideosToMyList(req.user._id, newVideo)
-        //      res.send("New video added!")
-
-    //   const isVideoThere = await UserSchema.findCourseInMyList(
-    //     req.user._id,
-    //     req.params.courseId
-    //   )
-    //   if (isVideoThere) {
-    
-    //     res.send("Video is already in db, info  needs to be updated")
-    //   } else {
-    //     await VideoSchema.addVideosToMyList(req.user._id, newVideo)
-    //     res.send("New video added!")
-    //   }
-   
-       
-       
-    } else {
-      const error = new Error()
-      error.httpStatusCode = 404
-      next(error)
+        const newVideo = new myProgressSchema({ ...req.body,
+          course:req.params.courseId,
+          user:req.user._id
+          })
+         
+          const { _id } = await newVideo.save()
+            
+          res.status(201).send(_id)
+          }
+           else {
+    const error = new Error()
+    error.httpStatusCode = 404
+    next(error)
+     }
     }
-  } catch (error) {
+
+     
+   
+}catch (error) {
     next(error)
   }
+})
+
+userRouter.get("/myLearning", authorize, async (req, res, next) => {
+	try {
+		const myCourses = await myProgressSchema.findOne({ user: req.user._id }).
+    populate('video')
+	
+    console.log(myCourses)
+
+
+    // let courses = await myProgressSchema.find().populate(
+		// 	"video","user"
+		// )
+ 
+    // myCourses = courses.filter((course) => course._id===req.user._id)
+ 
+    res.send(myCourses)
+		// if ( myCourses) {
+		// 	res.send( myCourses)
+		// } else {
+		// 	const error = new Error(` you have no course`)
+		// 	error.httpStatusCode = 404
+		// 	next(error)
+		// }
+	} catch (error) {
+		return next(error)
+	}
 })
 
 module.exports = userRouter;
