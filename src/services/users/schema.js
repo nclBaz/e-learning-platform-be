@@ -1,97 +1,99 @@
-// const { Schema, model } = require("mongoose")
-// const bcrypt = require("bcryptjs")
+const { Schema, model } = require("mongoose");
+const bcrypt = require("bcryptjs");
 
-// const UserSchema = new Schema(
-// 	{email: {
-// 		type: String,
-// 		required: true,
-// 		unique: true,
-// 	},
-		
-// 		password: {
-// 			type: String,
-// 			//	required: true,
-// 		},
-		
-// 		userName: String,
-// 		name: String,
-// 		surname: String,
-// 		profilePic: String,
-// 		// myVideos:[
-// 		// 	{ type: Schema.Types.ObjectId, ref: "Video" ,
-// 		// 	isCompleted:Boolean,
-// 		// 	remainingTime:Number,
-// 		// 	secondLeft:Number,
-// 		// 	completePercentage:Number,
-// 		// 	playlistIndex:Number
-			
-// 		// 	}
-			
-// 		// ],
-// 		likedVideos :[{ type: Schema.Types.ObjectId, ref: "Video" }],
-// 		savedVideos: [{ type: Schema.Types.ObjectId, ref: "Video" }],
+const UserSchema = new Schema(
+  
+    {
+      email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    googleId: String,
+      
+      password: {
+        type: String,
+        //	required: true,
+      },
+      
+      userName: String,
+      name: String,
+      surname: String,
+      profilePic: String,
+      myVideos:[
+      	{ type: Schema.Types.ObjectId, ref: "video" ,
+      	isCompleted:Boolean,
+      	remainingTime:Number,
+      	secondLeft:Number,
+      	completePercentage:Number,
+      	playlistIndex:Number
+        
+      	}
+        
+      ],
+      likedVideos :[{ type: Schema.Types.ObjectId, ref: "Video" }],
+      savedVideos: [{ type: Schema.Types.ObjectId, ref: "Video" }],
+  
+  
+      skills:[{
+        skills: String
+        
+        }],
+  
+        posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
+    
+      comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+      likedPosts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
+      likedComments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+  
+      
+
+    // refreshTokens: [
+    //   {
+    //     token: {
+    //       type: String,
+    //     },
+    //   },
+    // ],
+  },
+  { timestamps: true }
+);
 
 
-// 		skills:[{
-// 			skills: String
-		  
-// 		  }],
+UserSchema.methods.toJSON = function () {
+  const user = this
+  const userObject = user.toObject()
 
-// 		  posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
-	
-// 		// comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
-// 		// likedPosts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
-// 		// likedComments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
-// 		// follows: [{ type: Schema.Types.ObjectId, ref: "user", unique: true }],
-// 		// googleId: String,
-// 		  // refreshTokens: [
-//     //   {
-//     //     token: {
-//     //       type: String,
-//     //     },
-//     //   },
-//     // ],
-		
-// 	},
-// 	{ timestamps: true }
-// )
+  delete userObject.password
+  delete userObject.__v
 
-// UserSchema.statics.findByCredentials = async function (email, plainPW) {
-// 	const user = await this.findOne({ email })
-// 	console.log(user)
-// 	if (user) {
-// 		const isMatch = await bcrypt.compare(plainPW, user.password)
-// 		if (isMatch) return user
-// 		else return null
-// 	} else {
-// 		return null
-// 	}
-// }
-// UserSchema.pre("save", async function (next) {
-// 	const user = this
-// 	const plainPW = user.password
+  return userObject
+}
 
-// 	if (user.isModified("password")) {
-// 		user.password = await bcrypt.hash(plainPW, 10)
-// 	}
-// 	next()
-// })
+UserSchema.pre("save", async function (next) {
+  const user= this
+  const plainPW = user.password
 
-// UserSchema.static("findPopulated", async (id) => {
-// 	const User = await UserModel.findById(id)
-// 	//.populate("posts")
-// 	//.populate("follows")
-// 	return User
-// })
+  if (user.isModified("password")) {
+    user.password = await bcrypt.hash(plainPW, 10)
+  }
+  next()
+})
 
-// UserSchema.methods.toJSON = function () {
-// 	const user = this
-// 	const userObject = user.toObject()
+UserSchema .statics.findByCredentials = async function(email, plainPW)  {
+  const user = await this.findOne({ email })
+  
+  if (user) {
+    const isMatch = await bcrypt.compare(plainPW, user.password)
+    console.log("isMatch?",isMatch)
+    if (isMatch) 
+    return user
+    else return null
+  } else {
+    return null
+  }
+}
 
-// 	delete userObject.password
-// 	delete userObject.__v
 
-// 	return userObject
-// }
 
-// module.exports = model("User", UserSchema)
+module.exports = model("user", UserSchema);

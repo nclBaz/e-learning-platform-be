@@ -1,36 +1,52 @@
-const { Schema, model } = require("mongoose")
-const mongoose = require("mongoose")
-const mongoosePaginate = require("mongoose-paginate-v2")
+const { Schema, model } = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const VideoSchema = new Schema(
-	{
-		videoName: String,
-        tutor: {
-			tutorName: String,
-            tutorProfession:String
-		},
-        duration:Number,
-        playListLength:Number,
-        playList:[
-           { src:String,
-            duration:Number,
-            contentName:String,
+  {
+    videoName: String,
+    tutor: {
+      tutorName: String,
+      tutorProfession: String,
+    },
+    userVideos:[
+        { type: Schema.Types.ObjectId, ref: "user" ,
+        isCompleted:Boolean,
+        remainingTime:Number,
+        secondLeft:Number,
+        completePercentage:Number,
+        playlistIndex:Number
+      
+        }
+    ],
+    duration: Number,
+    playListLength: Number,
+    playList: [{ 
+        src: String, 
+        type:String,
+        duration: Number, 
+        contentName: String }],
+    category: String,
+    skills: [
+      {
+        type: String,
+      },
+    ],
 
-                }],
-        category:String,
-        skills:[{
-			skills: String
-		  
-		  }],
+    // likes: [{ type: Schema.Types.ObjectId, ref: "user"}],
 
-		// likes: [{ type: Schema.Types.ObjectId, ref: "user"}],
-		
-		// saved: [{ type: Schema.Types.ObjectId, ref: "user" }],
-	},
-	{ timestamps: true }
-)
-//{ type: "ObjectId", index: true }
+    // saved: [{ type: Schema.Types.ObjectId, ref: "user" }],
+  },
+  { timestamps: true }
+);
 
 
+UserSchema.static("addVideosToPlayList", async function (id, product) {
+    await VideoSchema.findOneAndUpdate(
+      { _id: id },
+      {
+        $push: { playList: product },
+      }
+    )
+  })
 
-module.exports = mongoose.model("Video", VideoSchema)
+module.exports = model("video", VideoSchema);
