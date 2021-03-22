@@ -21,14 +21,14 @@ const UserSchema = new Schema(
       surname: String,
       profilePic: String,
       myVideos:[
-      	{ type: Schema.Types.ObjectId, ref: "video" ,
+        {
+         type: Schema.Types.ObjectId, ref: "video" ,
       	isCompleted:Boolean,
       	remainingTime:Number,
       	secondLeft:Number,
       	completePercentage:Number,
-      	playlistIndex:Number
-        
-      	}
+      	playlistIndex:Number,
+        }
         
       ],
       likedVideos :[{ type: Schema.Types.ObjectId, ref: "Video" }],
@@ -93,6 +93,24 @@ UserSchema .statics.findByCredentials = async function(email, plainPW)  {
     return null
   }
 }
+
+UserSchema.static("findCourseInMyList", async function (id, courseId) {
+  const isCourseThere = await UserSchema.findOne({
+    _id: id,
+    "myVideos._id": courseId,
+  })
+  return isCourseThere
+})
+
+
+UserSchema.static("addVideosToMyList", async function (id, video) {
+  await UserSchema.findOneAndUpdate(
+    { _id: id },
+    {
+      $push: { myVideos: video},
+    }
+  )
+})
 
 
 

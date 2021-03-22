@@ -54,7 +54,7 @@ mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    useCreateIndex: true,
+    useCreateIndex:false,
   })
   .then(
     server.listen(process.env.PORT, () => {

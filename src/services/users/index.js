@@ -1,6 +1,7 @@
 const express = require("express");
 
 const UserSchema = require("./Schema");
+const VideoSchema = require("../videos/schema");
 const passport = require("passport");
 const fetch = require("node-fetch");
 
@@ -20,9 +21,6 @@ userRouter.get("/", async (req, res, next) => {
     next(error);
   }
 });
-
-
-
 
 userRouter.get(
   "/googleLogin",
@@ -137,5 +135,60 @@ userRouter.post("/logout", authorize, async (req, res, next) => {
     next(error);
   }
 });
+
+
+userRouter.post("/myLearning/:courseId",authorize, async (req, res, next) => {
+
+    
+  try {
+    const id = req.params.courseId
+    
+    const video = await VideoSchema.findById(id).populate(
+        "video"  
+    )
+    
+    if (video) {
+
+        const newVideo = { ...video.toObject(),
+          isCompleted:req.body.isCompleted,
+      	remainingTime:req.body.	remainingTime,
+      	secondLeft:	req.body.secondLeft,
+      	completePercentage:req.body.completePercentage,
+      	playlistIndex:req.body.playlistIndex}
+      
+        await UserSchema.findOneAndUpdate(
+            { _id: req.user._id },
+            {
+              $push: { myVideos: newVideo},
+            }
+          )
+          res.send(req.user.myVideos)
+
+        // await UserSchema.addVideosToMyList(req.user._id, newVideo)
+        //      res.send("New video added!")
+
+    //   const isVideoThere = await UserSchema.findCourseInMyList(
+    //     req.user._id,
+    //     req.params.courseId
+    //   )
+    //   if (isVideoThere) {
+    
+    //     res.send("Video is already in db, info  needs to be updated")
+    //   } else {
+    //     await VideoSchema.addVideosToMyList(req.user._id, newVideo)
+    //     res.send("New video added!")
+    //   }
+   
+       
+       
+    } else {
+      const error = new Error()
+      error.httpStatusCode = 404
+      next(error)
+    }
+  } catch (error) {
+    next(error)
+  }
+})
 
 module.exports = userRouter;
