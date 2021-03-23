@@ -1,6 +1,6 @@
 const express = require("express");
 
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
 const UserSchema = require("./Schema");
 const VideoSchema = require("../videos/schema");
@@ -11,7 +11,6 @@ const fetch = require("node-fetch");
 const { authenticate } = require("../auth/tools");
 const { authorize } = require("../auth/middleware");
 
-
 const userRouter = express.Router();
 
 // get all users
@@ -19,7 +18,6 @@ userRouter.get("/", async (req, res, next) => {
   try {
     const users = await UserSchema.find();
     res.status(200).send(users);
-
   } catch (error) {
     next(error);
   }
@@ -43,7 +41,9 @@ userRouter.get(
       //   path: "/authors/refreshToken",
       // })
       // res.status(200).redirect("http://localhost:3000/");
-      res.redirect("http://localhost:3000/"+"?accessToken="+req.user.tokens.accessToken) 
+      res.redirect(
+        "http://localhost:3000/" + "?accessToken=" + req.user.tokens.accessToken
+      );
     } catch (error) {
       next(error);
     }
@@ -52,8 +52,6 @@ userRouter.get(
 
 // get single user
 userRouter.get("/me", authorize, async (req, res, next) => {
-
-
   try {
     res.send(req.user);
   } catch (error) {
@@ -64,8 +62,6 @@ userRouter.get("/me", authorize, async (req, res, next) => {
 // edit user
 
 userRouter.put("/me", authorize, async (req, res, next) => {
-
-
   try {
     const updates = Object.keys(req.body);
     updates.forEach((update) => (req.user[update] = req.body[update]));
@@ -79,7 +75,6 @@ userRouter.put("/me", authorize, async (req, res, next) => {
 
 // delete user
 userRouter.delete("/me", authorize, async (req, res, next) => {
-
   try {
     await res.user.deleteOne();
     res.status(204).send("Delete");
@@ -87,7 +82,6 @@ userRouter.delete("/me", authorize, async (req, res, next) => {
     next(error);
   }
 });
-
 
 //post a new user
 userRouter.post("/register", async (req, res, next) => {
@@ -139,81 +133,92 @@ userRouter.post("/logout", authorize, async (req, res, next) => {
   }
 });
 
+userRouter.post("/myLearning/:courseId", authorize, async (req, res, next) => {
+  try {
+    const id = req.params.courseId;
 
-userRouter.post("/myLearning/:courseId",authorize, async (req, res, next) => {
-try{
-  const modifiedVideo = await  myProgressSchema.findOneAndUpdate({
-    "user._id": req.user._id,
-    "course._id": req.params.courseId,
-  }, { ...req.body,
-    course:req.params.courseId,
-    user:req.user._id
-    }, {
-    runValidators: true,
-    new: true,
-  })
- 
-  if(modifiedVideo){
-    res.send(modifiedVideo)
+    const course = await VideoSchema.findById(id);
 
-
-  }else{
-    const id = req.params.courseId
-    
-    const course = await VideoSchema.findById(id)
-    
     if (course) {
+      //Eğer ki bu user ve bu coursa ait zaten bir progress kaydı var ise modify et
+      const modifiedVideo = await myProgressSchema.findOneAndUpdate(
+        {
+          "user._id": req.user._id,
+          "course._id": req.params.courseId,
+        },
+        { ...req.body, course: req.params.courseId, user: req.user._id },
+        {
+          runValidators: true,
+          new: true,
+        }
+      );
 
-     
+      if (modifiedVideo) {
+        res.send(modifiedVideo);
+      } else {
+        //Eğer ki bu user ve bu coursa ait progress kaydı yok ise yeni progress kaydı oluştur.
 
-        const newVideo = new myProgressSchema({ ...req.body,
-          course:req.params.courseId,
-          user:req.user._id
-          })
-         
-          const { _id } = await newVideo.save()
-            
-          res.status(201).send(_id)
-          }
-           else {
-    const error = new Error()
-    error.httpStatusCode = 404
-    next(error)
-     }
+        const newVideo = new myProgressSchema({
+          ...req.body,
+          course: req.params.courseId,
+          user: req.user._id,
+        });
+        //AŞağıda oluşturulan yeni progree kaydının idsi mevcut
+        const { _id } = await newVideo.save();
+        ///User Schemaya da  progress kaydı  atıyoruz ki daha sonra get /me ile ulaşabilelim
+        const user= await UserSchema.findByIdAndUpdate(
+          req.user._id,
+          {
+            $addToSet: {
+              myProgress: _id,
+            },
+          },
+          { runValidators: true, new: true }
+        );
+
+        res.status(201).send(user);
+      }
+    } else {
+      //bu id ile bir kurs mevcut değil
+      const error = new Error();
+      error.httpStatusCode = 404;
+      next(error);
     }
-
-     
-   
-}catch (error) {
-    next(error)
+  } catch (error) {
+    next(error);
   }
-})
+});
 
 userRouter.get("/myLearning", authorize, async (req, res, next) => {
-	try {
+  try {
+    const userId = req.user._id;
+    // const myCourses = await  myProgressSchema.find(
+    //   {
+    //       user: userId
+    //   }
+    // )
+    // .populate('course')
+    // .populate('user')
 
+    const myCourses = await UserSchema.find({
+      _id: userId,
+    })
+      .populate("likedVideos")
+      .populate("savedVideos")
+      .populate("myProgress")
+      .populate('course')
+      .populate('user');
 
-    const userId= req.user._id
-    const myCourses = await  myProgressSchema.find(
-      {
-          user: userId
-      }
-    )
-    .populate('course')
-    .populate('user')
-    
-
-    
-		if ( myCourses) {
-			res.send(myCourses)
-		} else {
-			const error = new Error(` you have no course`)
-			error.httpStatusCode = 404
-			next(error)
-		}
-	} catch (error) {
-		return next(error)
-	}
-})
+    if (myCourses) {
+      res.send(myCourses);
+    } else {
+      const error = new Error(` you have no course`);
+      error.httpStatusCode = 404;
+      next(error);
+    }
+  } catch (error) {
+    return next(error);
+  }
+});
 
 module.exports = userRouter;

@@ -7,6 +7,7 @@ const VideoSchema = new Schema(
     tutor: {
       tutorName: String,
       tutorProfession: String,
+      tutorImg:String,
     },
     duration: Number,
     playListLength: Number,
@@ -21,6 +22,8 @@ const VideoSchema = new Schema(
         type: String,
       },
     ],
+    video_cover_img:String,
+
 
     likes: [{ type: Schema.Types.ObjectId, ref: "user"}],
 
@@ -33,7 +36,4 @@ const VideoSchema = new Schema(
 
 
 
-
-  const VideoModel = model("video", VideoSchema)
-
-module.exports = VideoModel;
+module.exports = model("Video", VideoSchema);

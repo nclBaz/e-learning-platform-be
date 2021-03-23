@@ -23,7 +23,7 @@ const UserSchema = new Schema(
     
       likedVideos :[{ type: Schema.Types.ObjectId, ref: "Video" }],
       savedVideos: [{ type: Schema.Types.ObjectId, ref: "Video" }],
-  
+      myProgress:[{ type: Schema.Types.ObjectId, ref: "progress" }],
   
       skills:[{
         skills: String
