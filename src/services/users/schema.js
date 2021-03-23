@@ -20,11 +20,7 @@ const UserSchema = new Schema(
       name: String,
       surname: String,
       profilePic: String,
-      myProgress:
-        [
-         {type: Schema.Types.ObjectId, ref: "progress" }
-     
-    ],
+    
       likedVideos :[{ type: Schema.Types.ObjectId, ref: "Video" }],
       savedVideos: [{ type: Schema.Types.ObjectId, ref: "Video" }],
   

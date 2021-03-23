@@ -1,5 +1,7 @@
 const express = require("express");
 
+const mongoose = require("mongoose")
+
 const UserSchema = require("./Schema");
 const VideoSchema = require("../videos/schema");
 const myProgressSchema = require("../myProgress/schema");
@@ -189,26 +191,26 @@ try{
 
 userRouter.get("/myLearning", authorize, async (req, res, next) => {
 	try {
-		const myCourses = await myProgressSchema.findOne({ user: req.user._id }).
-    populate('video')
-	
-    console.log(myCourses)
 
 
-    // let courses = await myProgressSchema.find().populate(
-		// 	"video","user"
-		// )
- 
-    // myCourses = courses.filter((course) => course._id===req.user._id)
- 
-    res.send(myCourses)
-		// if ( myCourses) {
-		// 	res.send( myCourses)
-		// } else {
-		// 	const error = new Error(` you have no course`)
-		// 	error.httpStatusCode = 404
-		// 	next(error)
-		// }
+    const userId= req.user._id
+    const myCourses = await  myProgressSchema.find(
+      {
+          user: userId
+      }
+    )
+    .populate('course')
+    .populate('user')
+    
+
+    
+		if ( myCourses) {
+			res.send(myCourses)
+		} else {
+			const error = new Error(` you have no course`)
+			error.httpStatusCode = 404
+			next(error)
+		}
 	} catch (error) {
 		return next(error)
 	}
