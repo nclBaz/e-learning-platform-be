@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const VideoSchema = new Schema(
   {
     videoName: String,
+    videoInfo:String,
     tutor: {
       tutorName: String,
       tutorProfession: String,
@@ -17,6 +18,7 @@ const VideoSchema = new Schema(
         duration: Number, 
         contentName: String }],
     category: String,
+    level:String,
     skills: [
       {
         type: String,
