@@ -325,7 +325,7 @@ videoRouter.post("/save/:courseId", authorize, async (req, res, next) => {
   }
 });
 
-videoRouter.post("/dissave/:courseId", authorize, async (req, res, next) => {
+videoRouter.post("/unsave/:courseId", authorize, async (req, res, next) => {
   try {
     const Course = await VideoSchema.findByIdAndUpdate(
       req.params.courseId,
@@ -344,7 +344,7 @@ videoRouter.post("/dissave/:courseId", authorize, async (req, res, next) => {
         req.user,
         {
           $pull: {
-            savedPosts: req.params.courseId,
+            savedVideos: req.params.courseId,
           },
         },
         { runValidators: true, new: true }
