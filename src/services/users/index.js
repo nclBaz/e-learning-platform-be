@@ -53,8 +53,27 @@ userRouter.get(
 // get single user
 userRouter.get("/me", authorize, async (req, res, next) => {
   try {
-    res.send(req.user);
-  } catch (error) {
+    const userId = req.user._id;
+    // const myCourses = await  myProgressSchema.find(
+    //   {
+    //       user: userId
+    //   }
+    // )
+    // .populate('course')
+    // .populate('user')
+
+    const me = await UserSchema.find({
+      _id: userId,
+    })
+      .populate("likedVideos")
+      .populate("savedVideos")
+      .populate("myProgress")
+      .populate('course')
+      .populate('user');
+
+      res.send(me[0]);
+   
+  }catch (error) {
     next(error);
   }
 });
@@ -175,6 +194,16 @@ userRouter.post("/myLearning/:courseId", authorize, async (req, res, next) => {
           },
           { runValidators: true, new: true }
         );
+         ///Video Schemaya da  progress kaydı  atıyoruz ki daha sonra get /videos ile ulaşabilelim
+         const video= await VideoSchema.findByIdAndUpdate(
+          req.params.courseId,
+          {
+            $addToSet: {
+              myProgress: _id,
+            },
+          },
+          { runValidators: true, new: true }
+        );
 
         res.status(201).send(user);
       }
@@ -192,22 +221,22 @@ userRouter.post("/myLearning/:courseId", authorize, async (req, res, next) => {
 userRouter.get("/myLearning", authorize, async (req, res, next) => {
   try {
     const userId = req.user._id;
-    // const myCourses = await  myProgressSchema.find(
-    //   {
-    //       user: userId
-    //   }
-    // )
-    // .populate('course')
-    // .populate('user')
+    const myCourses = await  myProgressSchema.find(
+      {
+          user: userId
+      }
+    )
+    .populate('course')
+    .populate('user')
 
-    const myCourses = await UserSchema.find({
-      _id: userId,
-    })
-      .populate("likedVideos")
-      .populate("savedVideos")
-      .populate("myProgress")
-      .populate('course')
-      .populate('user');
+    // const myCourses = await UserSchema.find({
+    //   _id: userId,
+    // })
+    //   .populate("likedVideos")
+    //   .populate("savedVideos")
+    //   .populate("myProgress")
+    //   .populate('course')
+    //   .populate('user');
 
     if (myCourses) {
       res.send(myCourses);
@@ -220,5 +249,44 @@ userRouter.get("/myLearning", authorize, async (req, res, next) => {
     return next(error);
   }
 });
+
+// userRouter.post("/:courseId/myProgress", authorize,async (req, res, next) => {
+//   try {
+ 
+   
+//     const myProgress = new myProgressSchema(req.body)
+    
+//     const progressToinsert = { ...myProgress.toObject(),course:req.params.courseId}
+//     console.log(myProgress,progressToinsert)
+
+//     const updated = await UserSchema.findByIdAndUpdate(
+//       req.user._id,
+//       {
+//         $push: {
+//           myProgress: progressToinsert,
+//         },
+//       },
+//       { runValidators: true, new: true }
+//     )
+//     res.status(201).send(updated)
+//   } catch (error) {
+//     next(error)
+//   }
+// })
+
+
+// userRouter.get("/myProgress", authorize,async (req, res, next) => {
+//   try {
+//     const { myProgress} = await UserSchema.findById(req.user._id, {
+//       myProgress: 1,
+//       _id: 0,
+//     }).populate("course")
+//     res.send(myProgress)
+//   } catch (error) {
+//     console.log(error)
+//     next(error)
+//   }
+// })
+
 
 module.exports = userRouter;

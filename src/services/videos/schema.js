@@ -23,7 +23,7 @@ const VideoSchema = new Schema(
       },
     ],
     video_cover_img:String,
-
+    myProgress:[{ type: Schema.Types.ObjectId, ref: "progress" }],
 
     likes: [{ type: Schema.Types.ObjectId, ref: "user"}],
 

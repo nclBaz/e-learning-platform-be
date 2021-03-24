@@ -3,7 +3,7 @@ const { Schema, model } = require("mongoose")
 const myProgressSchema = new Schema(
     { 
         user:{type: Schema.Types.ObjectId, ref: "user"},
-        course:{type: Schema.Types.ObjectId, ref: "video" },
+        course:{type: Schema.Types.ObjectId, ref: "Video" },
         isCompleted:Boolean,
         remainingTime:Number,
         secondLeft:Number,
