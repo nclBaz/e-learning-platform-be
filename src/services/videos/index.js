@@ -42,7 +42,9 @@ videoRouter.get("/:courseId", authorize, async (req, res, next) => {
   try {
     const id = req.params.courseId;
 
-    const video = await VideoSchema.findById(id);
+    const video = await VideoSchema.findById(id)
+    .populate("myProgress")
+    .populate("saved");;
     if (video) {
       res.send(video);
     } else {

@@ -250,6 +250,41 @@ userRouter.get("/myLearning", authorize, async (req, res, next) => {
   }
 });
 
+userRouter.get("/myLearning/:courseId", authorize, async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const courseId = req.params.courseId;
+    const myProgress = await  myProgressSchema.find(
+      {
+          user: userId,
+          course: courseId
+      }
+    )
+    .populate('course')
+
+
+    // const myProgress = await UserSchema.find({
+    //   _id: userId,
+    // })
+    //   .populate("likedVideos")
+    //   .populate("savedVideos")
+    //   .populate("myProgress")
+    //   .populate('course')
+    //   .populate('user');
+
+    if (myProgress) {
+      console.log(typeof myProgress[0])
+      res.send(myProgress[0]);
+    } else {
+      const error = new Error(` you have no course`);
+      error.httpStatusCode = 404;
+      next(error);
+    }
+  } catch (error) {
+    return next(error);
+  }
+});
+
 // userRouter.post("/:courseId/myProgress", authorize,async (req, res, next) => {
 //   try {
  
