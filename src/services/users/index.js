@@ -162,8 +162,8 @@ userRouter.post("/myLearning/:courseId", authorize, async (req, res, next) => {
       //Eğer ki bu user ve bu coursa ait zaten bir progress kaydı var ise modify et
       const modifiedVideo = await myProgressSchema.findOneAndUpdate(
         {
-          "user._id": req.user._id,
-          "course._id": req.params.courseId,
+          "user": req.user._id,
+          "course": req.params.courseId,
         },
         { ...req.body, course: req.params.courseId, user: req.user._id },
         {
@@ -178,7 +178,7 @@ userRouter.post("/myLearning/:courseId", authorize, async (req, res, next) => {
         //Eğer ki bu user ve bu coursa ait progress kaydı yok ise yeni progress kaydı oluştur.
 
         const newVideo = new myProgressSchema({
-          ...req.body,
+           
           course: req.params.courseId,
           user: req.user._id,
         });
