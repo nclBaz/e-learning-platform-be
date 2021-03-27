@@ -4,7 +4,10 @@ const myProgressSchema = new Schema(
     { 
         user:{type: Schema.Types.ObjectId, ref: "user"},
         course:{type: Schema.Types.ObjectId, ref: "Video" },
-        isCompleted:Boolean,
+        completed:[{
+          index:Number,
+          isCompleted:Boolean
+        }],
         remainingTime:Number,
         secondLeft:Number,
         completePercentage:Number,
