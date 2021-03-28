@@ -5,7 +5,7 @@ const myProgressSchema = new Schema(
         user:{type: Schema.Types.ObjectId, ref: "user"},
         course:{type: Schema.Types.ObjectId, ref: "Video" },
         completed:[ {
-          index: { type: String,unique: true }
+          index: { type: Number,unique: true }
         
         }],
         remainingTime:Number,

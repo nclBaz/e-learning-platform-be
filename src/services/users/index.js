@@ -182,6 +182,7 @@ userRouter.post("/myLearning/:courseId", authorize, async (req, res, next) => {
 
         const newVideo = new myProgressSchema({
           ...req.body,
+          playlistIndex:0,
           course: req.params.courseId,
           user: req.user._id,
         });
@@ -238,16 +239,17 @@ userRouter.post("/myLearning/:courseId/complete", authorize, async (req, res, ne
 
 //  if exists find progress schema 
     if (course) { 
-
+      let playlistIndex=req.body.index +1
       const completed = new completedSchema(req.body)
       const completedToInsert = { ...completed.toObject()}
       console.log(completed,completedToInsert)
-
-      const modifiedVideo = await myProgressSchema.findOneAndUpdate(
+   
+      const modifiedVideo =await myProgressSchema.findOneAndUpdate(
       {
         "user": req.user._id,
         "course": req.params.courseId,
       },
+     
       { $push: {
         completed: completedToInsert,
       },},
@@ -257,8 +259,10 @@ userRouter.post("/myLearning/:courseId/complete", authorize, async (req, res, ne
         }
       )
 
+      
+      
 
-      res.status(201).send(modifiedVideo);
+      res.send(modifiedVideo);
      
     }
     else{    //bu id ile bir kurs mevcut değil
