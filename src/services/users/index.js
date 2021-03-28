@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const UserSchema = require("./Schema");
 const VideoSchema = require("../videos/schema");
 const myProgressSchema = require("../myProgress/schema");
+const completedSchema = require("../completed/schema");
 const passport = require("passport");
 const fetch = require("node-fetch");
 
@@ -152,6 +153,8 @@ userRouter.post("/logout", authorize, async (req, res, next) => {
   }
 });
 
+
+//POST PROGRESS OF A COURSE
 userRouter.post("/myLearning/:courseId", authorize, async (req, res, next) => {
   try {
     const id = req.params.courseId;
@@ -178,7 +181,7 @@ userRouter.post("/myLearning/:courseId", authorize, async (req, res, next) => {
         //Eğer ki bu user ve bu coursa ait progress kaydı yok ise yeni progress kaydı oluştur.
 
         const newVideo = new myProgressSchema({
-           
+          ...req.body,
           course: req.params.courseId,
           user: req.user._id,
         });
@@ -205,7 +208,7 @@ userRouter.post("/myLearning/:courseId", authorize, async (req, res, next) => {
           { runValidators: true, new: true }
         );
 
-        res.status(201).send(user);
+        res.status(201).send(newVideo);
       }
     } else {
       //bu id ile bir kurs mevcut değil
@@ -217,6 +220,62 @@ userRouter.post("/myLearning/:courseId", authorize, async (req, res, next) => {
     next(error);
   }
 });
+//POST COMPLETE SITUTATION PROGRESS OF A COURSE
+userRouter.post("/myLearning/:courseId/complete", authorize, async (req, res, next) => {
+ 
+
+//  if exists push complete into Array
+//  if not create a progress
+
+
+
+  try {
+
+    //  find course, 
+    const id = req.params.courseId;
+
+    const course = await VideoSchema.findById(id);
+
+//  if exists find progress schema 
+    if (course) { 
+
+      const completed = new completedSchema(req.body)
+      const completedToInsert = { ...completed.toObject()}
+      console.log(completed,completedToInsert)
+
+      const modifiedVideo = await myProgressSchema.findOneAndUpdate(
+      {
+        "user": req.user._id,
+        "course": req.params.courseId,
+      },
+      { $push: {
+        completed: completedToInsert,
+      },},
+      {
+        runValidators: true,
+        new: true,
+        }
+      )
+
+
+      res.status(201).send(modifiedVideo);
+     
+    }
+    else{    //bu id ile bir kurs mevcut değil
+      const error = new Error();
+      error.httpStatusCode = 404;
+      next(error);}
+
+ 
+   
+
+  } catch (error) {
+    next(error)
+  }
+
+});
+
+
 
 userRouter.get("/myLearning", authorize, async (req, res, next) => {
   try {

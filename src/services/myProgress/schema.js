@@ -4,9 +4,9 @@ const myProgressSchema = new Schema(
     { 
         user:{type: Schema.Types.ObjectId, ref: "user"},
         course:{type: Schema.Types.ObjectId, ref: "Video" },
-        completed:[{
-          index:Number,
-          isCompleted:Boolean
+        completed:[ {
+          index: { type: String,unique: true }
+        
         }],
         remainingTime:Number,
         secondLeft:Number,
