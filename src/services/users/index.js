@@ -201,10 +201,17 @@ console.log("there is progress already so this is course duration--->",course.du
       } else {
         //Eğer ki bu user ve bu coursa ait progress kaydı yok ise yeni progress kaydı oluştur.
 console.log("hey new progress is saved here --> requestbody",req.body)
+let duration= course.duration //it should be second also
+
+let newTotalWatch= 0// it is second
+let remainingTime=duration -newTotalWatch
+let percentage= newTotalWatch/duration
         const newVideo = new myProgressSchema({
           ...req.body,
           playlistIndex:0,
-          totalWatch:0,
+          totalWatch:newTotalWatch,
+          completePercentage:percentage,
+          remainingTime:  remainingTime,
           course: req.params.courseId,
           user: req.user._id,
         });
