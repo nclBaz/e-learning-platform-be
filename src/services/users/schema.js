@@ -24,16 +24,7 @@ const UserSchema = new Schema(
       likedVideos :[{ type: Schema.Types.ObjectId, ref: "Video" }],
       savedVideos: [{ type: Schema.Types.ObjectId, ref: "Video" }],
       myProgress:[{ type: Schema.Types.ObjectId, ref: "progress" }],
-    //   myProgress:[  
-    //      { 
-    //     course:[{ type: Schema.Types.ObjectId, ref: "Video" }],
-    //     isCompleted:Boolean,
-    //     remainingTime:Number,
-    //     secondLeft:Number,
-    //     completePercentage:Number,
-    //     playlistIndex:Number,
-    // },
-     // ],
+
   
       skills:[{
         skills: String

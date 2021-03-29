@@ -8,6 +8,7 @@ const myProgressSchema = new Schema(
           index: { type: Number,unique: true }
         
         }],
+        totalWatch:Number,
         remainingTime:Number,
         secondLeft:Number,
         completePercentage:Number,

@@ -163,19 +163,36 @@ userRouter.post("/myLearning/:courseId", authorize, async (req, res, next) => {
 
     if (course) {
       //Eğer ki bu user ve bu coursa ait zaten bir progress kaydı var ise modify et
-      const modifiedVideo = await myProgressSchema.findOneAndUpdate(
-        {
-          "user": req.user._id,
-          "course": req.params.courseId,
-        },
-        { ...req.body, course: req.params.courseId, user: req.user._id },
-        {
-          runValidators: true,
-          new: true,
-        }
-      );
 
-      if (modifiedVideo) {
+
+
+       const myProgress = await  myProgressSchema.find(
+        {
+            user: req.user._id,
+            course: req.params.courseId
+        }
+      )
+
+      if (myProgress) {
+console.log(course.duration)
+        let duration= course.duration //it should be second also
+        let newTotalWatch= myProgress[0].totalWatch+ req.body.totalWatch// it is second
+        let percentage= newTotalWatch/duration
+        let remainingTime=duration -newTotalWatch
+
+        
+        const modifiedVideo = await myProgressSchema.findOneAndUpdate(
+          {
+            "user": req.user._id,
+            "course": req.params.courseId,
+          },
+          { ...req.body,totalWatch:  newTotalWatch,remainingTime:  remainingTime, completePercentage:percentage, course: req.params.courseId, user: req.user._id },
+          {
+            runValidators: true,
+            new: true,
+          }
+        );
+        
         res.send(modifiedVideo);
       } else {
         //Eğer ki bu user ve bu coursa ait progress kaydı yok ise yeni progress kaydı oluştur.
