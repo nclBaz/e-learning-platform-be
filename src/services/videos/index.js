@@ -1,5 +1,5 @@
 const express = require("express");
-
+const mongoose = require("mongoose")
 const VideoSchema = require("./schema");
 const UserSchema = require("../users/Schema");
 const playlistSchema = require("../playlist/schema");
@@ -13,7 +13,7 @@ const videoRouter = express.Router();
 videoRouter.post("/", authorize, async (req, res, next) => {
   try {
     console.log("NEW VIDEO");
-    const video = { ...req.body };
+    const video = { ...req.body,duration:0 };
     console.log(video);
 
     const newvideo = new VideoSchema(video);
@@ -107,6 +107,7 @@ videoRouter.post(
       const playlistToInsert = { ...playlist.toObject() };
       console.log(playlist, playlistToInsert);
 
+
       const updated = await VideoSchema.findByIdAndUpdate(
         req.params.courseId,
         {
@@ -116,6 +117,23 @@ videoRouter.post(
         },
         { runValidators: true, new: true }
       );
+      
+
+
+      let duration= updated.duration 
+      let newduration= updated.duration+req.body.duration
+    
+      console.log("duration,newduration",duration,newduration)
+      
+      const video = await VideoSchema.findByIdAndUpdate(
+        req.params.courseId,
+       {duration:newduration},
+        {
+          runValidators: true,
+          new: true,
+        }
+      );
+
       res.status(201).send(updated);
     } catch (error) {
       next(error);
@@ -125,10 +143,12 @@ videoRouter.post(
 
 videoRouter.get("/:courseId/playlist", authorize, async (req, res, next) => {
   try {
-    const { playlist } = await VideoSchema.findById(req.params.courseId, {
+    const playlist  = await VideoSchema.findById(req.params.courseId, {
       playList: 1,
       _id: 0,
     });
+
+    console.log(playlist)
     res.send(playlist);
   } catch (error) {
     console.log(error);
@@ -141,12 +161,13 @@ videoRouter.get(
   authorize,
   async (req, res, next) => {
     try {
-      const { playlist } = await VideoSchema.findOne(
+      const  playlist  = await VideoSchema.find(
         {
           _id: mongoose.Types.ObjectId(req.params.courseId),
         },
-        {
-          _id: 0,
+        {_id: 0,
+         
+          
           playList: {
             $elemMatch: { _id: mongoose.Types.ObjectId(req.params.videoId) },
           },
@@ -154,9 +175,13 @@ videoRouter.get(
       );
 
       if (playlist && playlist.length > 0) {
-        res.send(playlist[0]);
+        res.send(playlist[0].playList[0]);
       } else {
-        next();
+        const error = new Error(
+          `course with id ${req.params.courseId} or video with ID:${req.params.videoId}  not found`
+        );
+        error.httpStatusCode = 404;
+        next(error);
       }
     } catch (error) {
       console.log(error);
@@ -205,7 +230,7 @@ videoRouter.put(
           },
         }
       );
-
+console.log({ playlist })
       if (playlist && playlist.length > 0) {
         const reviewToReplace = { ...playlist[0].toObject(), ...req.body };
 

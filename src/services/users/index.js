@@ -168,19 +168,23 @@ userRouter.post("/myLearning/:courseId", authorize, async (req, res, next) => {
 
        const myProgress = await  myProgressSchema.find(
         {
-            user: req.user._id,
-            course: req.params.courseId
+          
+          course: req.params.courseId,
+          user: req.user._id
+            
         }
       )
 
-      if (myProgress) {
-console.log(course.duration)
+      console.log("myprogress[0]",myProgress[0])
+
+      if (myProgress[0]) {
+console.log("there is progress already so this is course duration--->",course.duration)
         let duration= course.duration //it should be second also
         let newTotalWatch= myProgress[0].totalWatch+ req.body.totalWatch// it is second
         let percentage= newTotalWatch/duration
         let remainingTime=duration -newTotalWatch
 
-        
+        console.log("there is progress already so this is newTotalWatch--->",course.duration,newTotalWatch)
         const modifiedVideo = await myProgressSchema.findOneAndUpdate(
           {
             "user": req.user._id,
@@ -196,15 +200,20 @@ console.log(course.duration)
         res.send(modifiedVideo);
       } else {
         //Eğer ki bu user ve bu coursa ait progress kaydı yok ise yeni progress kaydı oluştur.
-
+console.log("hey new progress is saved here --> requestbody",req.body)
         const newVideo = new myProgressSchema({
           ...req.body,
           playlistIndex:0,
+          totalWatch:0,
           course: req.params.courseId,
           user: req.user._id,
         });
+
+       
         //AŞağıda oluşturulan yeni progree kaydının idsi mevcut
         const { _id } = await newVideo.save();
+
+        console.log("hey new progress is saved here --> requestbody,newVideo,progressid",req.body,newVideo)
         ///User Schemaya da  progress kaydı  atıyoruz ki daha sonra get /me ile ulaşabilelim
         const user= await UserSchema.findByIdAndUpdate(
           req.user._id,
