@@ -10,7 +10,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_ID,
       clientSecret: process.env.GOOGLE_SECRET,
-      callbackURL: process.env.BACKEND_URL+"users/googleRedirect",
+      callbackURL: process.env.BACKEND_URL+"/users/googleRedirect",
     },
     async (request, accessToken, refreshToken, profile, next) => {
      

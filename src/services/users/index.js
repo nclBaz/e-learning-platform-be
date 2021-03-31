@@ -43,7 +43,7 @@ userRouter.get(
       // })
       // res.status(200).redirect("http://localhost:3000/");
       res.redirect(
-       process.env.FRONTEND_URL+ "?accessToken=" + req.user.tokens.accessToken
+       process.env.FRONTEND_URL+ "/?accessToken=" + req.user.tokens.accessToken
       );
     } catch (error) {
       next(error);
