@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose")
 const VideoSchema = require("./schema");
-const UserSchema = require("../users/Schema");
+const UserSchema = require("../users/schema");
 const playlistSchema = require("../playlist/schema");
 const q2m = require("query-to-mongo")
 
