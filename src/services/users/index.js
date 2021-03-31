@@ -124,10 +124,10 @@ userRouter.post("/login", async (req, res, next) => {
     console.log(accessToken);
     // without cookies res.send(tokens)
     //  Send back tokens
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      path: "/",
-    });
+    // res.cookie("accessToken", accessToken, {
+    //   httpOnly: true,
+    //   path: "/",
+    // });
     // res.cookie("refreshToken", refreshToken, {
     //   httpOnly: true,
     //   path: "/users/refreshToken",
