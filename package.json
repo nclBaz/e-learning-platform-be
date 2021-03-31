@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon -r dotenv/config ./src/server.js",
-     "start": "node ./src/server.js"
+    "start": "node ./src/server.js"
   },
   "repository": {
     "type": "git",
@@ -31,7 +31,6 @@
     "node-fetch": "^2.6.1",
     "passport": "^0.4.1",
     "passport-google-oauth20": "^2.0.0",
-    "passport-spotify": "^2.0.0",
     "query-to-mongo": "^0.10.1"
   },
   "devDependencies": {
