@@ -2,7 +2,7 @@ const express = require("express");
 
 const mongoose = require("mongoose");
 
-const UserSchema = require("./Schema");
+const UserSchema = require("./schema");
 const VideoSchema = require("../videos/schema");
 const myProgressSchema = require("../myProgress/schema");
 const completedSchema = require("../completed/schema");
